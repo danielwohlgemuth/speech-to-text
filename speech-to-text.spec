@@ -7,7 +7,7 @@ datas += collect_data_files('whisper')
 
 a = Analysis(
     ['src/main.py'],
-    pathex=[],
+    pathex=['src'],
     binaries=[],
     datas=datas,
     hiddenimports=['whisper', 'recorder', 'system_tray_icon'],

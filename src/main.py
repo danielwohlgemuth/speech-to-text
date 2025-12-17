@@ -1,5 +1,5 @@
-from src.recorder import Recorder
-from src.system_tray_icon import SystemTrayIcon
+from recorder import Recorder
+from system_tray_icon import SystemTrayIcon
 
 
 def main():
