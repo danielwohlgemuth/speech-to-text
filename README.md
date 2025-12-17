@@ -1,5 +1,13 @@
 # Speech to Text
 
-uv run live_transcription.py
+```bash
+uv run src/main.py
+```
 
-uv run record_then_transcribe.py
+```bash
+uv run pyinstaller --onefile --hidden-import=whisper --hidden-import=recorder --hidden-import=system_tray_icon --collect-data whisper src/main.py --name speech-to-text
+```
+
+```bash
+./dist/speech-to-text
+```

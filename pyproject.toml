@@ -11,3 +11,11 @@ dependencies = [
     "pystray==0.19.5",
     "sounddevice==0.5.3",
 ]
+
+[project.gui-scripts]
+speech-to-text = "main:main"
+
+[dependency-groups]
+dev = [
+    "pyinstaller==6.17.0",
+]
