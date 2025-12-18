@@ -64,7 +64,7 @@ class SystemTrayIcon:
                 self.recorder.start()
             else:
                 self.recorder.stop()
-                self.last_transcription = self.recorder.transcribe().strip()
+                self.last_transcription = self.recorder.transcribe()
                 print(self.last_transcription)
                 pyperclip.copy(self.last_transcription)
 
