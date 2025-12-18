@@ -16,6 +16,7 @@ class SystemTrayIcon:
         self.is_recording = False
         self.recorder = recorder
         self.icon = None
+        self.last_transcription = ""
 
     def create_image(self,color):
         width = 64
@@ -26,44 +27,51 @@ class SystemTrayIcon:
         dc.ellipse((width//6, height//6, 5*width//6, 5*height//6), fill=color)
         return image
 
-    def create_copy_menu_item(self, transcription):
-        def copy_to_clipboard(icon, item):
-            pyperclip.copy(transcription)
+    def get_record_text(self, item):
+        return UiText.STOP if self.is_recording else UiText.RECORD
 
-        if len(transcription) <= 10:
-            display_text = f'Copy "{transcription}"'
+    def get_copy_menu_item(self):
+        if not self.last_transcription:
+            return None
+
+        def copy_to_clipboard(icon, item):
+            pyperclip.copy(self.last_transcription)
+
+        if len(self.last_transcription) <= 15:
+            display_text = f'Copy "{self.last_transcription}"'
         else:
-            display_text = f'Copy "{transcription[:15]}..."'
+            display_text = f'Copy "{self.last_transcription[:15]}..."'
 
         return pystray.MenuItem(display_text, copy_to_clipboard)
+
+    def get_menu_items(self):
+        items = [pystray.MenuItem(self.get_record_text, self.record_or_transcribe)]
+
+        copy_item = self.get_copy_menu_item()
+        if copy_item:
+            items.append(copy_item)
+
+        items.append(pystray.MenuItem(UiText.QUIT, lambda icon, item: self.icon.stop()))
+        return items
 
     def record_or_transcribe(self, icon, item):
         try:
             self.is_recording = not self.is_recording
             color = 'yellow'
             self.icon.icon = self.create_image(color)
-            transcription = ''
 
             if self.is_recording:
                 self.recorder.start()
             else:
                 self.recorder.stop()
-                transcription = self.recorder.transcribe().strip()
-                print(transcription)
-                pyperclip.copy(transcription)
+                self.last_transcription = self.recorder.transcribe().strip()
+                print(self.last_transcription)
+                pyperclip.copy(self.last_transcription)
 
             color = 'red' if self.is_recording else 'blue'
             self.icon.icon = self.create_image(color)
-            text = UiText.STOP if self.is_recording else UiText.RECORD
 
-            menu_items = [pystray.MenuItem(text, self.record_or_transcribe)]
-
-            if transcription:
-                menu_items.append(self.create_copy_menu_item(transcription))
-
-            menu_items.append(pystray.MenuItem(UiText.QUIT, lambda icon, item: self.icon.stop()))
-
-            self.icon.menu = pystray.Menu(*menu_items)
+            self.icon.update_menu()
         except Exception as e:
             print('record_or_transcribe error', e)
 
@@ -72,8 +80,6 @@ class SystemTrayIcon:
             UiText.TITLE,
             title=UiText.TITLE,
             icon=self.create_image('blue'),
-            menu=pystray.Menu(
-                pystray.MenuItem(UiText.RECORD, self.record_or_transcribe),
-                pystray.MenuItem(UiText.QUIT, lambda icon, item: self.icon.stop())
-            ))
+            menu=pystray.Menu(lambda: self.get_menu_items())
+        )
         self.icon.run()
