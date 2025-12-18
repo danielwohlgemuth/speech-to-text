@@ -6,9 +6,10 @@ import whisper
 
 
 class Recorder:
-    def __init__(self):
+    def __init__(self, model_name="tiny.en"):
         self.is_recording = False
-        self.model = whisper.load_model("tiny.en")
+        self.model_name = model_name
+        self.model = whisper.load_model(model_name)
         self.whisper_sample_rate = whisper.audio.SAMPLE_RATE
         default_device = sd.query_devices(kind='input')
         self.device_sample_rate = default_device['default_samplerate']
@@ -52,3 +53,13 @@ class Recorder:
         normalized_audio = audio_data.flatten().astype(np.float32)
         transcription = self.model.transcribe(normalized_audio)
         return transcription["text"].strip()
+
+    def available_models(self):
+        return whisper.available_models()
+
+    def load_model(self, model_name):
+        self.model_name = model_name
+        self.model = whisper.load_model(model_name)
+
+    def get_current_model_name(self):
+        return self.model_name

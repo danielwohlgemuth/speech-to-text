@@ -8,6 +8,7 @@ class UiText():
     TITLE = "Speech to Text"
     RECORD = "Record"
     STOP = "Stop"
+    SELECT_MODEL = "Select Model"
     QUIT = "Quit Speech to Text"
 
 
@@ -30,6 +31,26 @@ class SystemTrayIcon:
     def get_record_text(self, item):
         return UiText.STOP if self.is_recording else UiText.RECORD
 
+    def get_model_menu_items(self):
+        models = self.recorder.available_models()
+        current_model = self.recorder.get_current_model_name()
+        menu_items = []
+
+        for model in models:
+            def create_model_handler(model_name):
+                def load_model(icon, item):
+                    self.icon.icon = self.create_image('yellow')
+                    self.recorder.load_model(model_name)
+                    print(f"Loaded model: {model_name}")
+                    self.icon.icon = self.create_image('blue')
+                    self.icon.update_menu()
+                return load_model
+
+            display_text = f"✓ {model}" if model == current_model else model
+            menu_items.append(pystray.MenuItem(display_text, create_model_handler(model)))
+
+        return menu_items
+
     def get_copy_menu_item(self):
         if not self.last_transcription:
             return None
@@ -50,6 +71,9 @@ class SystemTrayIcon:
         copy_item = self.get_copy_menu_item()
         if copy_item:
             items.append(copy_item)
+
+        if not self.is_recording:
+            items.append(pystray.MenuItem(UiText.SELECT_MODEL, pystray.Menu(lambda: self.get_model_menu_items())))
 
         items.append(pystray.MenuItem(UiText.QUIT, lambda icon, item: self.icon.stop()))
         return items
