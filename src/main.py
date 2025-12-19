@@ -3,6 +3,7 @@ import sys
 import signal
 import atexit
 from recorder import Recorder
+from transcriber import Transcriber
 from system_tray_icon import SystemTrayIcon
 
 
@@ -60,8 +61,9 @@ def signal_handler(signum, frame):
 def main():
     prevent_multiple_instances_workaround()
 
-    recorder = Recorder()
-    icon = SystemTrayIcon(recorder)
+    transcriber = Transcriber()
+    recorder = Recorder(transcriber.get_sample_rate())
+    icon = SystemTrayIcon(recorder, transcriber)
     icon.show()
 
 

@@ -2,15 +2,12 @@ import numpy as np
 import sounddevice as sd
 import threading
 import time
-import whisper
 
 
 class Recorder:
-    def __init__(self, model_name="tiny.en"):
+    def __init__(self, target_sample_rate=16000):
         self.is_recording = False
-        self.model_name = model_name
-        self.model = whisper.load_model(model_name)
-        self.whisper_sample_rate = whisper.audio.SAMPLE_RATE
+        self.target_sample_rate = target_sample_rate
         default_device = sd.query_devices(kind='input')
         self.device_sample_rate = default_device['default_samplerate']
         self.audio_buffer = []
@@ -18,8 +15,8 @@ class Recorder:
 
     def audio_callback_factory(self):
         def audio_callback(indata, frames, time_info, status):
-            if self.whisper_sample_rate != self.device_sample_rate:
-                resampling_factor = self.whisper_sample_rate / self.device_sample_rate
+            if self.target_sample_rate != self.device_sample_rate:
+                resampling_factor = self.target_sample_rate / self.device_sample_rate
                 resampled_length = int(len(indata) * resampling_factor)
                 indices = np.linspace(0, len(indata) - 1, resampled_length)
                 indata = np.interp(indices, np.arange(len(indata)), indata.flatten()).reshape(-1, 1)
@@ -48,18 +45,8 @@ class Recorder:
             if self.recording_thread and self.recording_thread.is_alive():
                 self.recording_thread.join(timeout=1.0)
 
-    def transcribe(self):
-        audio_data = np.empty((0, 1)) if not self.audio_buffer else np.concatenate(self.audio_buffer)
-        normalized_audio = audio_data.flatten().astype(np.float32)
-        transcription = self.model.transcribe(normalized_audio)
-        return transcription["text"].strip()
+    def get_audio_data(self):
+        return np.empty((0, 1)) if not self.audio_buffer else np.concatenate(self.audio_buffer)
 
-    def available_models(self):
-        return whisper.available_models()
-
-    def load_model(self, model_name):
-        self.model_name = model_name
-        self.model = whisper.load_model(model_name)
-
-    def get_current_model_name(self):
-        return self.model_name
+    def clear_buffer(self):
+        self.audio_buffer = []

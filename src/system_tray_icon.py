@@ -13,9 +13,10 @@ class UiText():
 
 
 class SystemTrayIcon:
-    def __init__(self, recorder):
+    def __init__(self, recorder, transcriber):
         self.is_recording = False
         self.recorder = recorder
+        self.transcriber = transcriber
         self.icon = None
         self.last_transcription = ""
 
@@ -32,15 +33,15 @@ class SystemTrayIcon:
         return UiText.STOP if self.is_recording else UiText.RECORD
 
     def get_model_menu_items(self):
-        models = self.recorder.available_models()
-        current_model = self.recorder.get_current_model_name()
+        models = self.transcriber.available_models()
+        current_model = self.transcriber.get_current_model_name()
         menu_items = []
 
         for model in models:
             def create_model_handler(model_name):
                 def load_model(icon, item):
                     self.icon.icon = self.create_image('yellow')
-                    self.recorder.load_model(model_name)
+                    self.transcriber.load_model(model_name)
                     print(f"Loaded model: {model_name}")
                     self.icon.icon = self.create_image('blue')
                     self.icon.update_menu()
@@ -88,9 +89,11 @@ class SystemTrayIcon:
                 self.recorder.start()
             else:
                 self.recorder.stop()
-                self.last_transcription = self.recorder.transcribe()
+                audio_data = self.recorder.get_audio_data()
+                self.last_transcription = self.transcriber.transcribe(audio_data)
                 print(self.last_transcription)
                 pyperclip.copy(self.last_transcription)
+                self.recorder.clear_buffer()
 
             color = 'red' if self.is_recording else 'blue'
             self.icon.icon = self.create_image(color)
