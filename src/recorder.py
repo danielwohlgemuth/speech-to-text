@@ -46,7 +46,6 @@ class Recorder:
                 self.recording_thread.join(timeout=1.0)
 
     def get_audio_data(self):
-        return np.empty((0, 1)) if not self.audio_buffer else np.concatenate(self.audio_buffer)
-
-    def clear_buffer(self):
+        audio_data = np.empty((0, 1)) if not self.audio_buffer else np.concatenate(self.audio_buffer)
         self.audio_buffer = []
+        return audio_data

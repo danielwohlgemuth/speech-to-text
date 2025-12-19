@@ -93,7 +93,6 @@ class SystemTrayIcon:
                 self.last_transcription = self.transcriber.transcribe(audio_data)
                 print(self.last_transcription)
                 pyperclip.copy(self.last_transcription)
-                self.recorder.clear_buffer()
 
             color = 'red' if self.is_recording else 'blue'
             self.icon.icon = self.create_image(color)
