@@ -22,3 +22,16 @@ uv run pyinstaller --onefile --collect-data whisper --name speech-to-text --path
 ```bash
 ./dist/speech-to-text
 ```
+
+## Run API
+
+```bash
+uv run src/api.py
+```
+
+## Run Web Server
+
+```bash
+uv run python -m http.server 3000
+http://localhost:3000/record_audio.html
+```
