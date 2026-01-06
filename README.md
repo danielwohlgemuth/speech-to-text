@@ -1,5 +1,9 @@
 # Speech to Text
 
+A simple GUI application for local speech-to-text transcription using OpenAI Whisper.
+
+![Screenshot](/assets/speech-to-text.png)
+
 ## Prerequisites
 
 - [Python](https://www.python.org/downloads/)
