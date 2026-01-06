@@ -56,10 +56,7 @@ class AudioRecorderGUI:
         self.model_var = tk.StringVar()
         self.model_dropdown = ttk.Combobox(model_frame, textvariable=self.model_var, state="readonly", width=15)
         self.model_dropdown.pack(side=tk.LEFT, padx=5)
-
-        self.load_model_btn = tk.Button(model_frame, text="📚 Load Model", command=self.load_model,
-                                      font=("Arial", 12), width=15, relief=tk.RAISED, borderwidth=2)
-        self.load_model_btn.pack(side=tk.LEFT, padx=5)
+        self.model_dropdown.bind('<<ComboboxSelected>>', lambda event: self.load_model())
 
         self.status_label = tk.Label(main_frame, text="Ready to record", font=("Arial", 10))
         self.status_label.pack(pady=5)
