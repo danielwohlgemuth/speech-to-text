@@ -23,19 +23,6 @@ class AudioRecorderGUI:
         main_frame = tk.Frame(self.root)
         main_frame.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
 
-        model_frame = tk.Frame(main_frame)
-        model_frame.pack(pady=10)
-
-        tk.Label(model_frame, text="Model:", font=("Arial", 12)).pack(side=tk.LEFT, padx=5)
-
-        self.model_var = tk.StringVar()
-        self.model_dropdown = ttk.Combobox(model_frame, textvariable=self.model_var, state="readonly", width=15)
-        self.model_dropdown.pack(side=tk.LEFT, padx=5)
-
-        self.load_model_btn = tk.Button(model_frame, text="📚 Load Model", command=self.load_model,
-                                      font=("Arial", 12), width=15, relief=tk.RAISED, borderwidth=2)
-        self.load_model_btn.pack(side=tk.LEFT, padx=5)
-
         self.status_frame = tk.Frame(main_frame)
         self.status_frame.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
 
@@ -60,6 +47,19 @@ class AudioRecorderGUI:
         self.copy_btn.pack(side=tk.LEFT, padx=10)
 
         self.current_text = ""
+
+        model_frame = tk.Frame(main_frame)
+        model_frame.pack(pady=10)
+
+        tk.Label(model_frame, text="Model:", font=("Arial", 12)).pack(side=tk.LEFT, padx=5)
+
+        self.model_var = tk.StringVar()
+        self.model_dropdown = ttk.Combobox(model_frame, textvariable=self.model_var, state="readonly", width=15)
+        self.model_dropdown.pack(side=tk.LEFT, padx=5)
+
+        self.load_model_btn = tk.Button(model_frame, text="📚 Load Model", command=self.load_model,
+                                      font=("Arial", 12), width=15, relief=tk.RAISED, borderwidth=2)
+        self.load_model_btn.pack(side=tk.LEFT, padx=5)
 
     def update_model_dropdown(self):
         try:
