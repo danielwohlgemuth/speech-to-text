@@ -23,15 +23,6 @@ class AudioRecorderGUI:
         main_frame = tk.Frame(self.root)
         main_frame.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
 
-        self.status_frame = tk.Frame(main_frame)
-        self.status_frame.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
-
-        self.status_text = tk.Text(self.status_frame, font=("Arial", 11), wrap=tk.WORD,
-                                  height=8, relief=tk.FLAT, borderwidth=0)
-        self.status_text.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
-        self.status_text.insert("1.0", "Ready to record")
-        self.status_text.config(state=tk.DISABLED)
-
         button_frame = tk.Frame(main_frame)
         button_frame.pack(pady=20)
 
@@ -45,6 +36,15 @@ class AudioRecorderGUI:
                                  width=15, height=2, relief=tk.RAISED, borderwidth=2,
                                  state=tk.DISABLED)
         self.copy_btn.pack(side=tk.LEFT, padx=10)
+
+        self.transcription_frame = tk.Frame(main_frame)
+        self.transcription_frame.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
+
+        self.transcription_text = tk.Text(self.transcription_frame, font=("Arial", 11), wrap=tk.WORD,
+                                          height=8, relief=tk.FLAT, borderwidth=0)
+        self.transcription_text.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
+        self.transcription_text.insert("1.0", "")
+        self.transcription_text.config(state=tk.DISABLED)
 
         self.current_text = ""
 
@@ -60,6 +60,9 @@ class AudioRecorderGUI:
         self.load_model_btn = tk.Button(model_frame, text="📚 Load Model", command=self.load_model,
                                       font=("Arial", 12), width=15, relief=tk.RAISED, borderwidth=2)
         self.load_model_btn.pack(side=tk.LEFT, padx=5)
+
+        self.status_label = tk.Label(main_frame, text="Ready to record", font=("Arial", 10))
+        self.status_label.pack(pady=5)
 
     def update_model_dropdown(self):
         try:
@@ -99,7 +102,7 @@ class AudioRecorderGUI:
             self.is_recording = True
             self.record_btn.config(text="⏹️ Stop")
             self.copy_btn.config(state=tk.DISABLED)
-            self.update_status("Recording...")
+            self.update_status("Recording")
 
             self.recorder.start()
 
@@ -113,11 +116,13 @@ class AudioRecorderGUI:
         try:
             self.is_recording = False
             self.record_btn.config(text="🎤 Record")
-            self.update_status("Processing audio...")
+            self.update_status("Processing audio")
 
             self.recorder.stop()
 
             threading.Thread(target=self.transcribe_audio, daemon=True).start()
+
+            self.update_status("Ready to record")
 
         except Exception as e:
             messagebox.showerror("Error", f"Failed to stop recording: {str(e)}")
@@ -140,12 +145,18 @@ class AudioRecorderGUI:
 
     def on_transcription_complete(self, text):
         self.current_text = text
-        self.update_status(text)
+        self.update_transcription(text)
         self.copy_btn.config(state=tk.NORMAL)
 
     def on_transcription_error(self, error):
         self.update_status(f"Error: {error}")
         messagebox.showerror("Transcription Error", error)
+
+    def update_transcription(self, text):
+        self.transcription_text.config(state=tk.NORMAL)
+        self.transcription_text.delete("1.0", tk.END)
+        self.transcription_text.insert("1.0", text)
+        self.transcription_text.config(state=tk.DISABLED)
 
     def copy_text(self):
         if self.current_text:
@@ -157,7 +168,4 @@ class AudioRecorderGUI:
             self.root.after(2000, lambda: self.copy_btn.config(text=original_text))
 
     def update_status(self, message):
-        self.status_text.config(state=tk.NORMAL)
-        self.status_text.delete("1.0", tk.END)
-        self.status_text.insert("1.0", message)
-        self.status_text.config(state=tk.DISABLED)
+        self.status_label.config(text=message)
