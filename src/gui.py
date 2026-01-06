@@ -21,10 +21,10 @@ class AudioRecorderGUI:
 
     def setup_ui(self):
         main_frame = tk.Frame(self.root)
-        main_frame.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
+        main_frame.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
 
         button_frame = tk.Frame(main_frame)
-        button_frame.pack(pady=20)
+        button_frame.pack(pady=10)
 
         self.record_btn = tk.Button(button_frame, text="🎤 Record", command=self.toggle_recording,
                                    font=("Arial", 12, "bold"),
@@ -38,11 +38,11 @@ class AudioRecorderGUI:
         self.copy_btn.pack(side=tk.LEFT, padx=10)
 
         self.transcription_frame = tk.Frame(main_frame)
-        self.transcription_frame.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
+        self.transcription_frame.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
 
-        self.transcription_text = tk.Text(self.transcription_frame, font=("Arial", 11), wrap=tk.WORD,
-                                          height=8, relief=tk.FLAT, borderwidth=0)
-        self.transcription_text.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
+        self.transcription_text = tk.Text(self.transcription_frame, font=("Arial", 16), wrap=tk.WORD,
+                                          height=8, relief=tk.FLAT, borderwidth=0, pady=10, padx=10)
+        self.transcription_text.pack(fill=tk.BOTH, expand=True)
         self.transcription_text.insert("1.0", "")
         self.transcription_text.config(state=tk.DISABLED)
 
@@ -86,7 +86,9 @@ class AudioRecorderGUI:
         try:
             self.root.update()
 
+            self.update_status('Loading model')
             self.transcriber.load_model(model_name)
+            self.update_status('Model loaded')
         except Exception as e:
             messagebox.showerror("Error", f"Failed to load model: {str(e)}")
             self.update_status(f"Error loading model: {str(e)}")
