@@ -44,29 +44,16 @@
             border-radius: 5px;
             background-color: #e9ecef;
         }
-        #console {
-            background-color: #000;
-            color: #00ff00;
-            padding: 15px;
-            border-radius: 5px;
-            height: 200px;
-            overflow-y: auto;
-            font-family: monospace;
-            font-size: 12px;
-            margin-top: 20px;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Audio Recorder</h1>
         <div class="status" id="status">Ready to record</div>
+        <button id="copyBtn" style="display: none; background-color: #28a745;">📋</button>
 
-        <button id="recordBtn">Start Recording</button>
-        <button id="stopBtn" disabled>Stop Recording</button>
-        <button id="sendBtn" disabled>Send to API</button>
+        <button id="recordBtn">🎤</button>
 
-        <div id="console"></div>
     </div>
 
     <script>
@@ -75,17 +62,10 @@
         let audioBlob;
 
         const recordBtn = document.getElementById('recordBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const sendBtn = document.getElementById('sendBtn');
         const status = document.getElementById('status');
-        const consoleDiv = document.getElementById('console');
+        const copyBtn = document.getElementById('copyBtn');
+        let isRecording = false;
 
-        function log(message) {
-            const timestamp = new Date().toLocaleTimeString();
-            consoleDiv.innerHTML += `[${timestamp}] ${message}\n`;
-            consoleDiv.scrollTop = consoleDiv.scrollHeight;
-            console.log(message);
-        }
 
         async function webmToWav(webmBlob) {
             return new Promise((resolve) => {
@@ -99,7 +79,7 @@
                         const wavBlob = audioBufferToWav(audioBuffer);
                         resolve(wavBlob);
                     } catch (error) {
-                        log(`Error converting audio: ${error.message}`);
+                        console.error('Error converting audio:', error.message);
                         resolve(webmBlob);
                     }
                 };
@@ -176,39 +156,23 @@
                 mediaRecorder.onstop = async () => {
                     const webmBlob = new Blob(audioChunks, { type: 'audio/webm' });
                     audioBlob = await webmToWav(webmBlob);
-                    log(`Audio converted to WAV: ${audioBlob.size} bytes`);
-                    sendBtn.disabled = false;
+
+                    await submitAudio();
                 };
 
                 mediaRecorder.start();
-                recordBtn.disabled = true;
-                stopBtn.disabled = false;
+                isRecording = true;
+                recordBtn.textContent = '⏹️';
                 recordBtn.classList.add('recording');
-                recordBtn.textContent = 'Recording...';
-                status.textContent = 'Recording...';
-                log('Recording started');
             } catch (error) {
-                log(`Error accessing microphone: ${error.message}`);
+                console.error('Error accessing microphone:', error.message);
                 status.textContent = `Error: ${error.message}`;
             }
         }
 
-        function stopRecording() {
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
-                mediaRecorder.stream.getTracks().forEach(track => track.stop());
-                recordBtn.disabled = false;
-                stopBtn.disabled = true;
-                recordBtn.classList.remove('recording');
-                recordBtn.textContent = 'Start Recording';
-                status.textContent = 'Recording stopped. Ready to send.';
-                log('Recording stopped');
-            }
-        }
-
-        async function sendToAPI() {
+        async function submitAudio() {
             if (!audioBlob) {
-                log('No audio recorded');
+                console.error('No audio recorded');
                 return;
             }
 
@@ -216,10 +180,6 @@
             formData.append('audio', audioBlob, 'recording.wav');
 
             try {
-                sendBtn.disabled = true;
-                status.textContent = 'Sending to API...';
-                log('Sending audio to API...');
-
                 const response = await fetch('http://localhost:8000/transcribe?model_name=tiny.en', {
                     method: 'POST',
                     body: formData
@@ -230,22 +190,50 @@
                 }
 
                 const result = await response.json();
-                log('API Response received:');
-                log(JSON.stringify(result, null, 2));
-                status.textContent = `Transcription: ${result.text}`;
+                status.textContent = result.text;
+                copyBtn.style.display = 'inline-block';
             } catch (error) {
-                log(`Error sending to API: ${error.message}`);
+                console.error('Error sending to API:', error.message);
                 status.textContent = `Error: ${error.message}`;
             } finally {
-                sendBtn.disabled = false;
+                recordBtn.disabled = false;
             }
         }
 
-        recordBtn.addEventListener('click', startRecording);
-        stopBtn.addEventListener('click', stopRecording);
-        sendBtn.addEventListener('click', sendToAPI);
+        async function toggleRecording() {
+            if (!isRecording) {
+                await startRecording();
+            } else {
+                await stopRecording();
+            }
+        }
 
-        log('Audio recorder initialized');
+        async function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                isRecording = false;
+                recordBtn.textContent = '🎤';
+                recordBtn.classList.remove('recording');
+            }
+        }
+
+        recordBtn.addEventListener('click', toggleRecording);
+
+        copyBtn.addEventListener('click', () => {
+            const text = status.textContent;
+            if (text && !text.startsWith('Error:')) {
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalText = copyBtn.textContent;
+                    copyBtn.textContent = '✅';
+                    setTimeout(() => {
+                        copyBtn.textContent = originalText;
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy text:', err);
+                });
+            }
+        });
     </script>
 </body>
 </html>
