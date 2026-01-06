@@ -25,7 +25,6 @@ class Recorder:
 
     def record(self):
         try:
-            print("Recording. Press Ctrl+C to stop and transcribe.")
             with sd.InputStream(callback=self.audio_callback_factory(), channels=1, samplerate=self.device_sample_rate, blocksize=1024):
                 while self.is_recording:
                     time.sleep(0.1)
