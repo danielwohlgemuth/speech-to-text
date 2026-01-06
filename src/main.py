@@ -2,9 +2,8 @@ import os
 import sys
 import signal
 import atexit
-from recorder import Recorder
-from transcriber import Transcriber
-from system_tray_icon import SystemTrayIcon
+import tkinter as tk
+from gui import AudioRecorderGUI
 
 
 PID_FILE = os.path.expanduser("~/.speech-to-text.pid")
@@ -61,10 +60,15 @@ def signal_handler(signum, frame):
 def main():
     prevent_multiple_instances_workaround()
 
-    transcriber = Transcriber()
-    recorder = Recorder(transcriber.get_sample_rate())
-    icon = SystemTrayIcon(recorder, transcriber)
-    icon.show()
+    root = tk.Tk()
+    app = AudioRecorderGUI(root)
+
+    def on_closing():
+        cleanup()
+        root.destroy()
+
+    root.protocol("WM_DELETE_WINDOW", on_closing)
+    root.mainloop()
 
 
 if __name__ == "__main__":
