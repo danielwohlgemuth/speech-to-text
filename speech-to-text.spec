@@ -1,15 +1,11 @@
 # -*- mode: python ; coding: utf-8 -*-
-from PyInstaller.utils.hooks import collect_data_files
-
-datas = []
-datas += collect_data_files('whisper')
 
 
 a = Analysis(
     ['src/main.py'],
     pathex=['src'],
     binaries=[],
-    datas=datas,
+    datas=[],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

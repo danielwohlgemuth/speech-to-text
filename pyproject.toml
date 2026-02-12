@@ -5,12 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "openai-whisper==20250625",
     "sounddevice==0.5.3",
     "fastapi==0.115.6",
     "uvicorn==0.32.1",
     "python-multipart==0.0.17",
     "soundfile==0.12.1",
+    "transformers>=5.1.0",
+    "torch>=2.10.0",
 ]
 
 [project.gui-scripts]

@@ -54,7 +54,7 @@ class AudioRecorderGUI:
         tk.Label(model_frame, text="Model:", font=("Arial", 12)).pack(side=tk.LEFT, padx=5)
 
         self.model_var = tk.StringVar()
-        self.model_dropdown = ttk.Combobox(model_frame, textvariable=self.model_var, state="readonly", width=15)
+        self.model_dropdown = ttk.Combobox(model_frame, textvariable=self.model_var, state="readonly", width=20)
         self.model_dropdown.pack(side=tk.LEFT, padx=5)
         self.model_dropdown.bind('<<ComboboxSelected>>', lambda event: self.load_model())
 
@@ -140,7 +140,8 @@ class AudioRecorderGUI:
             self.root.after(0, lambda: self.on_transcription_complete(transcription))
 
         except Exception as e:
-            self.root.after(0, lambda: self.on_transcription_error(str(e)))
+            error_msg = str(e)
+            self.root.after(0, lambda: self.on_transcription_error(error_msg))
 
     def on_transcription_complete(self, text):
         self.current_text = text

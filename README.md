@@ -1,6 +1,6 @@
 # Speech to Text
 
-A simple GUI application for offline (after initial download) speech-to-text transcription using the [OpenAI Whisper](https://github.com/openai/whisper) Python library.
+A simple GUI application for offline (after initial download) speech-to-text transcription, originally using the [OpenAI Whisper](https://github.com/openai/whisper) Python library, but now using the [Hugging Face Transformers](https://github.com/huggingface/transformers) Python library.
 
 ![Screenshot](/assets/speech-to-text.png)
 
@@ -18,7 +18,7 @@ uv run src/main.py
 ## Build
 
 ```bash
-uv run pyinstaller --onefile --collect-data whisper --name speech-to-text --paths src src/main.py
+uv run pyinstaller --onefile --name speech-to-text --paths src src/main.py
 ```
 
 ## Run build
